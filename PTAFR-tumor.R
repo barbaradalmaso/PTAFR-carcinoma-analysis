@@ -18,7 +18,7 @@ raw.metadata <- rbind(raw.metadata[,3:4], raw.metadata_bladder[,3:4], raw.metada
 
 case_ids <- character(nrow(raw.metadata))
 for (i in 1:nrow(raw.metadata)) { # Loop for extract case_id information from JSON files
-
+	
 	case_ids[i] <- raw.metadata[[1]][[i]]$case_id
 }
 
@@ -58,17 +58,17 @@ Bladder = c("Anterior wall of bladder",
 		  "Ureteric orifice")
 
 Colorectal = c("Ascending colon",
-			 "Cecum",
-			 "Colon, NOS",
-			 "Connective, subcutaneous and other soft tissues of abdomen",
-			 "Descending colon",
-			 "Hepatic flexure of colon",
-			 "Rectosigmoid junction",
-			 "Rectum, NOS",
-			 "Sigmoid colon",
-			 "Small intestine, NOS",
-			 "Splenic flexure of colon",
-			 "Transverse colon")
+			"Cecum",
+			"Colon, NOS",
+			"Connective, subcutaneous and other soft tissues of abdomen",
+			"Descending colon",
+			"Hepatic flexure of colon",
+			"Rectosigmoid junction",
+			"Rectum, NOS",
+			"Sigmoid colon",
+			"Small intestine, NOS",
+			"Splenic flexure of colon",
+			"Transverse colon")
 
 Lung = c("Lower lobe, lung",
 	    "Lung, NOS",
@@ -147,33 +147,33 @@ tissues <- unique(metadata$tissue)
 
 # Function to create a table for each tissue
 table_for_tissue <- function(x, metadata, directory) {
-    metadata_files <- metadata %>%
-        filter(tissue == x)
-    
-    # List to store tables
-    tables_for_tissue <- list()
-    
-    # Loop on metadata for each tissue
-    for (file_name in metadata_files$file_name) {
-        file_path <- file.path(directory, file_name)
-        
-        # Check if the file exists before attempting to read it
-        if (file.exists(file_path)) {
-            file <- read.table(file_path, header = TRUE, sep = "\t")
-            
-            # Extract relevant columns (gene_name, gene_type, tpm_unstranded) and add to the list
-            filtered_data <- file %>%
-                select(gene_name, tpm_unstranded) %>%
-                filter(gene_name == "PTAFR")
-            
-            tables_for_tissue[[file_name]] <- filtered_data
-            cat("File successfully downloaded:", file_path, "\n")
-        } else {
-            cat("File not found:", file_path, "\n")
-        }
-    }
-    
-    return(tables_for_tissue)
+	metadata_files <- metadata %>%
+		filter(tissue == x)
+	
+	# List to store tables
+	tables_for_tissue <- list()
+	
+	# Loop on metadata for each tissue
+	for (file_name in metadata_files$file_name) {
+		file_path <- file.path(directory, file_name)
+		
+		# Check if the file exists before attempting to read it
+		if (file.exists(file_path)) {
+			file <- read.table(file_path, header = TRUE, sep = "\t")
+			
+			# Extract relevant columns (gene_name, gene_type, tpm_unstranded) and add to the list
+			filtered_data <- file %>%
+				select(gene_name, tpm_unstranded) %>%
+				filter(gene_name == "PTAFR")
+			
+			tables_for_tissue[[file_name]] <- filtered_data
+			cat("File successfully downloaded:", file_path, "\n")
+		} else {
+			cat("File not found:", file_path, "\n")
+		}
+	}
+	
+	return(tables_for_tissue)
 }
 
 # List to store tables for each tissue
@@ -181,7 +181,7 @@ table_list <- list()
 
 # Loop over the unique tissues to create separate tables
 for (tissue_name in tissues) {
-    table_list[[tissue_name]] <- table_for_tissue(tissue_name, metadata, directory)
+	table_list[[tissue_name]] <- table_for_tissue(tissue_name, metadata, directory)
 }
 
 # Clean table
@@ -233,7 +233,10 @@ PTAFR_expression$tissue <- str_to_title(PTAFR_expression$tissue)
 order <- c("Uterus", "Thyroid", "Stomach", "Prostate", "Pancreas", "Lung", "Kidney", "Colorectal", "Breast", "Bladder")
 PTAFR_expression$tissue <- factor(PTAFR_expression$tissue, levels = order)
 
-# Plote o gráfico
+# Graph plot
+# Histogram for all tissues
+cores_tissue <- c("#001F3F", "#003366", "#004080", "#005A8D", "#0072BB", "#0088CC", "#3299CC", "#66B3CC", "#99CCFF", "#B3E0FF")
+
 ggplot(PTAFR_expression, aes(x = PTAFR, y = tissue, fill = tissue)) +
 	geom_density_ridges(
 		jittered_points = TRUE,
@@ -254,9 +257,6 @@ ggplot(PTAFR_expression, aes(x = PTAFR, y = tissue, fill = tissue)) +
 		panel.background = element_rect(fill = "white")
 	) +
 	coord_cartesian(xlim = c(-2, 100))
-
-# Histogram for all tissues
-cores_tissue <- c("#001F3F", "#003366", "#004080", "#005A8D", "#0072BB", "#0088CC", "#3299CC", "#66B3CC", "#99CCFF", "#B3E0FF")
 
 ######## Basic histogram
 ggplot(PTAFR_expression, aes(x = PTAFR, fill = tissue)) +
@@ -279,7 +279,7 @@ PTAFR_expression$log2_transformed <- log2(PTAFR_expression$PTAFR)
 PTAFR_expression$log2_transformed <- ifelse(is.finite(PTAFR_expression$log2_transformed), PTAFR_expression$log2_transformed, NA)
 
 # Individual histogram for each type of tumor
-	ggplot(PTAFR_expression, aes(x = PTAFR, y = tissue, fill = tissue)) +
+ggplot(PTAFR_expression, aes(x = PTAFR, y = tissue, fill = tissue)) +
 	geom_density_ridges(
 		jittered_points = TRUE,
 		position = position_points_jitter(width = 0.05, height = 0),
@@ -289,7 +289,7 @@ PTAFR_expression$log2_transformed <- ifelse(is.finite(PTAFR_expression$log2_tran
 	geom_vline(xintercept = q3, color = "black", size = 0.25) +
 	scale_fill_manual(values = cores_tissue) +
 	labs(x = "PTAFR Expression Log2(TPM)") +
-		theme(
+	theme(
 		axis.title.x = element_text(hjust = 0.5),
 		axis.title.y = element_blank(),
 		axis.text.y = element_text(size = 9),
@@ -342,49 +342,31 @@ ggplot(count_percentage, aes(x = tissue, y = perc, fill = tissue, alpha = type))
 	scale_alpha_manual(values = c(High = 0.8, Low = 0.4))
 
 
-# Plot for figure on PTAFR protein expression downloaded from The Human Protein Atlas https://www.proteinatlas.org/ENSG00000169403-PTAFR/pathology/ovarian+cancer#Quantity
-protein_PTAFR <- read.delim("/home/bad23/Documents/Data_Analysis/Bioinformatic-Analysis-DSMZ/Cancer/patient_counts_processed/protein_expression.csv", header = TRUE, sep = ",")
+PTAFR_expression <- PAFR_expression %>% select(-tissue_type)
+PTAFR_expression <- unique(PTAFR_expression)
 
-protein_PTAFR$Percentage <- factor(protein_PTAFR$Percentage, 
-							levels = c("<75%", "75%-25%", "<25%", "None"))
+# Save metadata table 
+write.table(PTAFR_expression, file = "~/Documents/Data_Analysis/Bioinformatic-Analysis-DSMZ/Cancer/patient_counts_processed/metadata_ptafr.csv", row.names = FALSE) # Linux
 
-protein_PTAFR$Tissue <- factor(protein_PTAFR$Tissue, 
-							levels = order)
+write.table(PTAFR_expression, file = "/Volumes/Extreme SSD/DSMZ/files_processed/metadata_ptafr.csv", row.names = FALSE) # MacOS
 
-ggplot(protein_PTAFR, aes(x = Tissue, y = Counting, fill = Percentage)) +
-	geom_col(aes(position = "stack")) +
-	labs(x = NULL, y = "Patients (%)", alpha = "PTAFR", fill = "Positive Tumor Cells") +
-	theme(axis.text.x = element_text(size = 10),
-		 axis.text.y = element_text(size = 10),
-		 axis.title.x = element_text(size = 12),
-		 axis.line.x = element_line(lineend = "butt"),
-		 panel.grid.major.y = element_blank(),
-		 panel.grid.minor.y = element_blank(),
-		 panel.grid.major.x = element_blank(),
-		 panel.background = element_blank()) +
-	coord_flip() +
-	scale_y_continuous(limits = c(0, 100), expand = c(0, 0)) +
-	scale_fill_manual(values = c("#1b9e77", "#d95f02", "#001F3F", "gray"))
-
-# Save metadata table
-write.table(PTAFR_expression, file = "~/Documents/Data_Analysis/Bioinformatic-Analysis-DSMZ/Cancer/patient_counts_processed/metadata_ptafr.csv", row.names = FALSE)
 
 # -------------------------------------------- Part 2: Metadata analysis: SEER Survival, % Tumor size, and Metadata T and N  -------------------------------------------------------
 # Survival rates analysis using SEER-NIH 5-year relative survival 
 # Load packages
-	library(ggplot2)
-	library(dplyr)
-	library(ggrepel)
-	library(stringr)
-	
+library(ggplot2)
+library(dplyr)
+library(ggrepel)
+library(stringr)
+
 PAFR_expression <- read.table("/Volumes/Extreme SSD/DSMZ/files_processed/metadata_ptafr.csv", header = TRUE, sep = " ") # Updated to SSD (15.12.23)
-	
+
 # Create a data frame based on the values obtained on the SEER website
 survival <- data.frame(tissue = c("Breast", "Uterus", "Colorectal", "Stomach", "Kidney", "Lung", "Pancreas", "Prostate", "Thyroid", "Bladder"),
 				   survival = c(87.9, 81.4, 62.9, 24.9, 67.5, 17.8, 5.8,
 				   		   98.0, 96.9, 74.3))
 
-sample_size <- PAFR_expression %>% # take off control group
+sample_size <- PAFR_expression %>% 
 	group_by(tissue, type) %>%
 	summarize(count = n())
 
@@ -394,7 +376,7 @@ sample_size <- sample_size %>%
 
 sample_size <- sample_size[,c(-2,-3)]
 sample_size <- unique(sample_size)
-	
+
 ptafr_rates <- PAFR_expression %>%
 	group_by(tissue) %>%
 	summarize(mean = mean(PTAFR),
@@ -414,10 +396,10 @@ ggplot(data = survival, aes(x = survival, y = log2(mean), color = tissue)) +
 	labs(x = "Tumor 5-Year Relative Survival (%)", y = "PTAFR Expression Log2(TPM)", size = "Sample size") +
 	scale_color_manual(values = cores_tissue) +
 	theme(axis.title.y = element_text(size = 12),
-	axis.text.y = element_text(size = 12),
-	axis.text.x = element_text(size = ),
-	panel.border = element_rect(color = "black", size = 1.5, fill = NA),
-	panel.background = element_rect(fill = "white"))
+		 axis.text.y = element_text(size = 12),
+		 axis.text.x = element_text(size = ),
+		 panel.border = element_rect(color = "black", size = 1.5, fill = NA),
+		 panel.background = element_rect(fill = "white"))
 
 ggplot(data = survival, aes(x = survival, y = log2(mean), color = tissue)) +
 	geom_point(aes(size = sample), shape = 16) +
@@ -446,21 +428,22 @@ metadata_clinical <- metadata_clinical %>%
 metadata_clinical$gross_tumor_weight <- gsub("'--", NA, metadata_clinical$gross_tumor_weight)
 metadata_clinical$tumor_largest_dimension_diameter <- gsub("'--", NA, metadata_clinical$tumor_largest_dimension_diameter)
 metadata_clinical$tumor_thickness <- gsub("'--", NA, metadata_clinical$tumor_thickness)
-metadata_clinical <- metadata_clinical[,c(1,3,9)]
+metadata_clinical <- metadata_clinical[,c(1,2,3,8)]
 metadata_clinical$tumor_largest_dimension_diameter <- as.numeric( metadata_clinical$tumor_largest_dimension_diameter)
 metadata_clinical <- metadata_clinical %>%
 	filter(type != "Control")
 high <- metadata_clinical %>%
 	filter(type != "Low")
 low <- metadata_clinical %>%
-	filter(type != "High")
-low <- low[c(-10, -22, -27, -78),] # Remove outliers
+	filter(type != "High") %>%
+	arrange(desc(tumor_largest_dimension_diameter))
+low <- low[c(-1, -2, -3, -4),] # Remove outliers
 test <- wilcox.test(high$tumor_largest_dimension_diameter, low$tumor_largest_dimension_diameter)
 
 metadata_clinical <- rbind(high, low)
 write.table(metadata_clinical, file = "metadata_clinical.tsv", sep = "\t", row.names = FALSE)
-######## Finished part tumor tickness
 
+######## Finished part tumor tickness
 # Tumor stage
 clinical_data <- read.delim("/Volumes/Extreme SSD/DSMZ/metadata/clinical.tsv", sep = " ", header = TRUE)
 clinical_data <- clinical_data[,c(1,26:29)]
@@ -536,7 +519,7 @@ table_for_tissue <- function(x, metadata, directory) {
 				filter(!is.na(tpm_unstranded)) %>%
 				filter(gene_type == "protein_coding") %>%
 				select(tpm_unstranded)
-				
+			
 			tables_for_tissue[[file_name]] <- filtered_data
 			cat("File sucessfully found:", file_path, "\n")
 		} else {
@@ -618,7 +601,7 @@ for (i in metadata_names) {
 	write.table(table, file = paste0 (dir_path, i, ".tsv"), sep = "\t", row.names = FALSE)
 }
 
-# -------------------------------------------------- Part 4: DESEQ Analysis --------------------------------------------------------
+# -------------------------------------------------- Part 4: DESEQ and ORA Analysis --------------------------------------------------------
 # Perform DESEQ analysis over different tumor types according to PTAFR low and high
 # Load packages
 library(dplyr)
@@ -696,8 +679,8 @@ cts_names <- sort(cts_names)
 for (i in seq_along(cts_names)) {
 	cts <- get(cts_names[i])
 	metadata <- get(metadata_names[i])
-
-		if (!is.null(cts) && !is.null(metadata)) {
+	
+	if (!is.null(cts) && !is.null(metadata)) {
 		res <- DESeqDataSetFromMatrix(countData = round(cts),
 								colData = metadata,
 								design = ~type)
@@ -719,7 +702,7 @@ for (i in file_names) {
 	res$diffexpressed[res$log2FoldChange > 1 & res$padj < 0.05] <- "up"
 	res$diffexpressed[res$log2FoldChange < -1 & res$padj < 0.05] <- "down"
 	assign(i, res, envir = .GlobalEnv)
-	}
+}
 
 # Volcano-plot (general overview)
 file_names <- paste0("deseq.", tissues)
@@ -727,7 +710,7 @@ file_names <- sort(file_names)
 tissues <- sort(tissues)
 
 for (variable in file_names) {
-
+	
 	file <- get(variable) 
 	file <- file[row.names(file) != "PTAFR", ]
 	
@@ -748,7 +731,7 @@ for (variable in file_names) {
 			 axis.title.x = element_blank())
 	
 	print(plot)
-	}
+}
 
 # Count % DEG
 file_names 
@@ -756,7 +739,7 @@ df <- data.frame()
 for (i in file_names) {
 	file <- get(i)
 	gene_counts <- data.frame(table(file$diffexpressed))
-		if (ncol(df) == 0) {
+	if (ncol(df) == 0) {
 		df <- gene_counts
 		colnames(df) <- c("Genes", i)
 	} else {
@@ -775,9 +758,9 @@ DEG <- DEG %>%
 		  perc.no = 100*no/total)
 
 DEG <- DEG[,c(-1,-2,-3,-4)]
-DEG$tissue <- c("Breast", "Pancreas",
-			 "Thyroid", "Bladder", "Kidney", "Prostate", 
-			 "Colorectal", "Lung", "Uterus", "Stomach")
+tissue.names <- rownames(DEG)
+tissue.names <- sub("deseq.", "", tissue.names)
+DEG$tissue <- tissue.names
 
 DEG <- DEG %>%
 	arrange(tissue)
@@ -806,9 +789,8 @@ ggplot(DEG_all, aes(x = tissue, y = perc, fill = type)) +
 	scale_fill_manual(values = c(Down = "#001F3F", 
 						    No = "#e0e0e0", 
 						    Up = "#d95f02")) +
-		coord_flip() +
+	coord_flip() +
 	scale_y_continuous(limits = c(0, 100), expand = c(0, 0))
-	
 
 # PCA-plot (optional?)
 metadata_names <- paste0("metadata.", tissues)
@@ -884,7 +866,7 @@ file_names <- paste0("ora", file_names)
 df <- data.frame(Description = character(0), padjust = numeric(0), Tissue = character(0))
 for (i in file_names) {
 	file <- get(i)
-	file <- file[1:3, c(3, 7)]
+	file <- file[, c(3, 7)]
 	file$Tissue <- rep(gsub("orasig.deseq.", "", i), nrow(file))
 	if (nrow(df) == 0) {
 		df <- file
@@ -919,9 +901,13 @@ chord_matrix <- as.matrix(chord_matrix)
 chord_matrix <- t(chord_matrix)
 
 # save chord
+# set colors
+cores_tissue <- c("#001F3F", "#003366", "#004080", "#005A8D", "#0072BB", "#0088CC", "#3299CC", "#66B3CC", "#99CCFF", "#B3D9FF")
+cores_chord <- setNames(cores_tissue,  sort(tissues))
+
 chordDiagram(chord_matrix, annotationTrack = c("name", "grid"), 
 		   directional = 1, transparency = 0.4, 
-		   big.gap = 50, small.gap = 1)
+		   big.gap = 50, small.gap = 1, grid.col = cores_chord)
 
 # Now I analyzed  the significant pathways regulated in each type of tumor. Now I will analyze the similar pathways and differently expressed genes across the different tumor types
 # Load packages
@@ -979,7 +965,7 @@ annotation$file_name <- gsub(".rna_seq.augmented_star_gene_counts.tsv", "", anno
 annotation <- annotation[!duplicated(annotation$file_name), ]
 annotation <- subset(annotation, file_name %in% sample_names)
 rownames(annotation) <- annotation$file_name
-annotation <- annotation[,c(-1, -2, -3, -5)]
+annotation <- annotation[,c(-1, -2, -3, -6)]
 
 annotation <- annotation %>%
 	arrange(tissue, type)
@@ -988,7 +974,7 @@ annotation <- annotation %>%
 
 colnames(annotation) <- c("Tissue", "PTAFR")
 
-common_colnames <- intersect(colnames(cts_deg), annotation$file_name)
+common_colnames <- intersect(colnames(cts_deg), rownames(annotation))
 cts_deg <- cts_deg[, common_colnames]
 colnames(cts_deg) <- common_colnames
 
@@ -1009,7 +995,6 @@ cores_annotation <- list(Tissue = setNames(cores_tissue,  sort(tissues)),
 genes <- unique(rownames(cts_deg))
 cts_deg <- cts_deg[genes,]
 
-
 library(pheatmap)
 pheatmap(cts_deg, 
 	    cluster_rows = FALSE,  # Agrupar as linhas
@@ -1018,7 +1003,7 @@ pheatmap(cts_deg,
 	    show_rownames = TRUE,  # N??o mostrar os nomes das linhas
 	    show_colnames = FALSE,
 	    clustering_distance_cols = "canberra",
-	    fontsize_row = 4,
+	    fontsize_row = 5.5,
 	    annotation_col = annotation,
 	    annotation_colors = cores_annotation)
 
@@ -1075,6 +1060,74 @@ cnetplot(genes, circular = FALSE,showCategory = 7, colorEdge = T, foldChange=gen
 cnetplot(genes, node_label="gene", 
 	    showCategory = 7, foldChange=gene_list, colorEdge = T) +
 	scale_colour_gradient2(name = "Log2 Fold-Change", low = "blue", mid = "lightgreen", high = "#f33119")
+
+# -------------------------------------------------- Part 4.2: Supplementary tables with DEG and ORA lists --------------------------------------------------------
+###### DEG
+# Transform significant DEG for each tissue in a unique list of dataframes
+# Get sig up and down genes
+file_names <- paste0("deseq.", tissues)
+for (i in file_names) {
+	data <- get(i)
+	data <- as.data.frame(data)
+	data <- data %>%
+		filter(padj <= 0.05, log2FoldChange >= 1)
+	data_genes <- rownames(data)
+	data_genes <- as.data.frame(data_genes)
+	colnames(data_genes) <- i
+	assign(paste0("up.", i), data_genes, envir = .GlobalEnv)
+}
+
+file_names <- paste0("deseq.", tissues)
+for (i in file_names) {
+	data <- get(i)
+	data <- as.data.frame(data)
+	data <- data %>%
+		filter(padj <= 0.05, log2FoldChange <= -1)
+	data_genes <- rownames(data)
+	data_genes <- as.data.frame(data_genes)
+	colnames(data_genes) <- i
+	assign(paste0("down.", i), data_genes, envir = .GlobalEnv)
+}
+
+# One table for down-regulated genes
+tissues.deseq <- paste0("down.deseq.", tissues)
+tissues.deseq <- lapply(tissues.deseq, get) # Merge all vectors in one list
+names(tissues.deseq) <- tissues # Name each df
+# Loop for all df to have the same row number
+for (i in tissues) {
+	df <- tissues.deseq[[i]]
+	df[nrow(df):2209,] <- NA
+	tissues.deseq[[i]] <- df
+	assign("genes_downregulated", tissues.deseq, envir = .GlobalEnv)
+}
+
+# Merge all downregulated dfs
+tissues.downregulated <- do.call(cbind, tissues.deseq)
+colnames(tissues.downregulated) <- tissues
+write.table(tissues.downregulated, "down.individual.tissues.csv", row.names = FALSE, sep = ",")
+
+# One table for up-regulated genes
+tissues.deseq <- paste0("up.deseq.", tissues)
+tissues.deseq <- lapply(tissues.deseq, get) # Merge all vectors in one list
+names(tissues.deseq) <- tissues # Name each df
+# Loop for all df to have the same row number
+for (i in tissues) {
+	df <- tissues.deseq[[i]]
+	df[nrow(df):2809,] <- NA
+	tissues.deseq[[i]] <- df
+	assign("genes_upregulated", tissues.deseq, envir = .GlobalEnv)
+}
+
+# Merge all downregulated dfs
+tissues.upregulated <- do.call(cbind, tissues.deseq)
+colnames(tissues.upregulated) <- tissues
+write.table(tissues.upregulated, "up.individual.tissues.csv", row.names = FALSE, sep = ",")
+
+###### ORA
+ora.tissues <- paste0("orasig.deseq.", tissues)
+for (i in ora.tissues) {
+	df <- get(i)
+	}
 
 # -------------------------------------------------- Part 5: Tumor cell composition between PTAFR Low and High --------------------------------------------------------
 # Metadata analysis for loot at tumor micro-environment between PTAFR low and high groups
@@ -1461,4 +1514,3 @@ tumor_composition <- data.frame(Positive = rowMeans(positive_cell_score),
 						  Negative = rowMeans(negative_cell_score))
 
 write.table(tumor_composition, file = "~/Desktop/immunodeconv.linux/tumor_cells.tsv", sep = "\t", row.names = FALSE)
-

@@ -614,7 +614,6 @@ library(ggridges)
 library(DESeq2)
 
 # Load data
-# Linux
 metadata_ptafr <- read.delim("/Volumes/Extreme SSD/DSMZ/files_processed/metadata_ptafr.csv", header = TRUE, sep = " ")
 
 # Cts files
@@ -733,6 +732,25 @@ for (variable in file_names) {
 	print(plot)
 }
 
+# Get table list with 500 most DEG across different tissues
+file_names 
+df <- data.frame()
+for (i in file_names) {
+	file <- get(i)
+	gene_names <- rownames(file)
+	file <- file[, c("diffexpressed")]
+	file <- data.frame(file)
+	rownames(file) <- gene_names
+	colnames(file) <- i
+	if (ncol(df) == 0) {
+		df <- file
+	} else {
+		df <- cbind(df, file)
+	}
+}
+
+write.table(df, "deseq DEGS all tissues.csv", row.names = TRUE, sep = ",")
+
 # Count % DEG
 file_names 
 df <- data.frame()
@@ -793,45 +811,46 @@ ggplot(DEG_all, aes(x = tissue, y = perc, fill = type)) +
 	scale_y_continuous(limits = c(0, 100), expand = c(0, 0))
 
 # PCA-plot (optional?)
-metadata_names <- paste0("metadata.", tissues)
-cts_names <- paste0("cts.", tissues)
-metadata_names <- sort(metadata_names)
-cts_names <- sort(cts_names)
+# metadata_names <- paste0("metadata.", tissues)
+# cts_names <- paste0("cts.", tissues)
+# metadata_names <- sort(metadata_names)
+# cts_names <- sort(cts_names)
 
-for (i in cts_names) {
-	for (o in metadata_names) {
-		cts <- get(i)
-		coldata <- get(o)
-		
-		if (ncol(cts) == nrow(coldata)) { 
-			
-			# Create DESeqDataSetFromMatrix
-			res_data <- DESeqDataSetFromMatrix(countData = round(cts), colData = coldata, design = ~type)
-			
-			# Apply VST transformation
-			res_data <- vst(res_data, blind = FALSE)
-			
-			# Create PCA plot
-			plot <- plotPCA(res_data, intgroup = "type") +
-				geom_point(aes(color = type)) + 
-				labs(title = i) +
-				scale_color_manual(values = c("#00DAE0", "#FF9289")) +
-				theme(panel.background = element_blank(),
-					 plot.background = element_blank(),
-					 panel.border = element_rect(color = "black", fill = NA, size = 2),
-					 legend.position = "none",
-					 axis.text.x = element_text(size = 18), 
-					 axis.text.y = element_text(size = 12),
-					 axis.title.y = element_text(size = 18),
-					 axis.title.x = element_text(size = 18))
-			
-			print(plot)
-			
-		} else {
-			print(paste0(i, " nao tem o mesmo numero de colunas que ", o))
-		}
-	}
-}
+# for (i in cts_names) {
+#	for (o in metadata_names) {
+#		cts <- get(i)
+#		coldata <- get(o)
+#		
+#		if (ncol(cts) == nrow(coldata)) { 
+#			
+#			# Create DESeqDataSetFromMatrix
+#			res_data <- DESeqDataSetFromMatrix(countData = round(cts), colData = coldata, design = ~type)
+#			
+#			# Apply VST transformation
+#			res_data <- vst(res_data, blind = FALSE)
+#			
+#			# Create PCA plot
+#			plot <- plotPCA(res_data, intgroup = "type") +
+#				geom_point(aes(color = type)) + 
+#				labs(title = i) +
+#				scale_color_manual(values = c("#00DAE0", "#FF9289")) +
+#				theme(panel.background = element_blank(),
+#					 plot.background = element_blank(),
+#					 panel.border = element_rect(color = "black", fill = NA, size = 2),
+#					 legend.position = "none",
+#					 axis.text.x = element_text(size = 18), 
+#					 axis.text.y = element_text(size = 12),
+#					 axis.title.y = element_text(size = 18),
+#					 axis.title.x = element_text(size = 18))
+#			
+#			print(plot)
+#			
+#		} else {
+#			print(paste0(i, " nao tem o mesmo numero de colunas que ", o))
+#		}
+#	}
+#
+
 
 # After getting the DEG across the different tumor types, the next step is to evaluate the biological pathways related to these genes in each tumor types
 # Ora analysis for each tumor type
@@ -866,7 +885,7 @@ file_names <- paste0("ora", file_names)
 df <- data.frame(Description = character(0), padjust = numeric(0), Tissue = character(0))
 for (i in file_names) {
 	file <- get(i)
-	file <- file[, c(3, 7)]
+	file <- file[, c("Description", "p.adjust")]
 	file$Tissue <- rep(gsub("orasig.deseq.", "", i), nrow(file))
 	if (nrow(df) == 0) {
 		df <- file
@@ -874,6 +893,9 @@ for (i in file_names) {
 		df <- rbind(df, file)
 	}
 }
+
+write.table(df, "total ORA for each tissue.csv", row.names = FALSE, sep = ",")
+
 
 df <- df %>% 
 	mutate(Description = gsub("extracellular structure organization", 
@@ -890,8 +912,11 @@ df <- df %>%
 
 # Chord diagram
 chord_data <- df %>%
+	group_by(Tissue) %>%
+	slice_max(order_by = p.adjust, n = 3) %>%
 	group_by(Tissue, Description) %>%
-	summarise(p.adjust_sum = sum(p.adjust))
+	summarise(p.adjust_sum = sum(p.adjust), .groups = "drop")
+
 chord_matrix <- chord_data %>%
 	spread(key = Description, value = p.adjust_sum, fill = 0) %>%
 	as.data.frame()
@@ -905,9 +930,10 @@ chord_matrix <- t(chord_matrix)
 cores_tissue <- c("#001F3F", "#003366", "#004080", "#005A8D", "#0072BB", "#0088CC", "#3299CC", "#66B3CC", "#99CCFF", "#B3D9FF")
 cores_chord <- setNames(cores_tissue,  sort(tissues))
 
+circos.clear()
+circos.par(gap.after=c(rep(1,length(rownames(chord_matrix))-1),10,rep(1,length(colnames(chord_matrix))-1),10))
 chordDiagram(chord_matrix, annotationTrack = c("name", "grid"), 
-		   directional = 1, transparency = 0.4, 
-		   big.gap = 50, small.gap = 1, grid.col = cores_chord)
+		   directional = 1, transparency = 0.4,grid.col = cores_chord)
 
 # Now I analyzed  the significant pathways regulated in each type of tumor. Now I will analyze the similar pathways and differently expressed genes across the different tumor types
 # Load packages
@@ -939,9 +965,27 @@ for (i in file_names) {
 	new_list <- append(new_list,list)
 }
 
+
 toy <- Venn(new_list)
 setmap(toy, element_clustering = T, set_clustering = T)
 sig_toy <- overlap(toy) # Overlap genes
+
+# Get log2fold-change for each overlapping gene for Supplementary Table 4
+file_names <- paste0("deseq.", tissues)
+sig_toy # Has all overlaping genes
+file_new <- data.frame()
+for (i in file_names) {
+	file <- get(i)
+	filtered_rows <- file[rownames(file) %in% sig_toy,"log2FoldChange", drop = FALSE]
+	if (nrow(file_new) == 0) {
+		file_new <- data.frame(filtered_rows)
+		colnames(file_new) <- i
+	} else {
+		file_new <- cbind(file_new, setNames(data.frame(filtered_rows), i))
+	}
+}
+log2foldchange <- file_new
+write.table(log2foldchange, "fg for overlapping genes.csv", row.names = TRUE, sep = ",")
 
 # Heatmap with similar DEG across the tumor types
 # Bind all cts files
@@ -1022,6 +1066,8 @@ genes <- enrichGO(gene = sig_toy,
 			   ont = "ALL", pvalueCutoff = 0.05, qvalueCutoff = 0.05)
 
 genes@result[["Description"]] <- str_to_title(genes@result[["Description"]])
+ora_table <- genes@result
+write.table(ora_table, "ora overlapping genes.cvs", row.names = TRUE, sep = ",")
 
 # Cnetplot DEG
 # Log2FoldChange between samples
@@ -1053,11 +1099,10 @@ genes@result[["Description"]] <- gsub("Regulation Of Cell-Cell Adhesion", "Leuko
 gene_list <- fd_siggenes$mean
 names(gene_list) <- rownames(fd_siggenes)
 cnetplot(genes, circular = FALSE,showCategory = 7, colorEdge = T, foldChange=gene_list) +
-	scale_colour_gradient2(name = "Log2 Fold-Change", low = "blue", mid = "green", high = "#f33119",
-					   node_label = "none")
+	scale_colour_gradient2(name = "Log2 Fold-Change", low = "blue", mid = "green", high = "#f33119")
 
 
-cnetplot(genes, node_label="gene", 
+cnetplot(genes, node_label="all", 
 	    showCategory = 7, foldChange=gene_list, colorEdge = T) +
 	scale_colour_gradient2(name = "Log2 Fold-Change", low = "blue", mid = "lightgreen", high = "#f33119")
 

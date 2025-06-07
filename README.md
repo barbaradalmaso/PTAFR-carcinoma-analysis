@@ -6,12 +6,7 @@ Solid tumor carcinogenesis is driven by complex interactions within the tumor mi
 
 ## 👩‍🔬 Authors
 
-Barbara Dalmaso¹²  
-Ildefonso Alves da Silva-Junior²  
-Sonia Jancar²  
-Laura Steenpass¹  
-Carolina Beltrame Del Debbio²  
-Claudia Pommerenke¹  
+**Barbara Dalmaso**¹², Ildefonso Alves da Silva-Junior², Sonia Jancar², Laura Steenpass¹, Carolina Beltrame Del Debbio², Claudia Pommerenke¹  
 
 ¹ Leibniz-Institute DSMZ – German Collection of Microorganisms and Cell Cultures GmbH, Braunschweig, Germany  
 ² Institute of Biomedical Sciences, University of São Paulo, São Paulo, Brazil

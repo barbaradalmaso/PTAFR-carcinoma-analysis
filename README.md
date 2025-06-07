@@ -2,15 +2,7 @@
 
 ## 📌 Abstract
 
-Solid tumor carcinogenesis is driven by complex interactions within the tumor microenvironment (TME), which influence tumor initiation, progression, and response to treatment. The phospholipid platelet-activating factor (PAF) has been described to affect TME and growth; however, evidence so far has been limited to experimental in vitro and in vivo models.
-
-This study investigates the role of PAF receptor (PTAFR) across various carcinomas through patient data-driven analysis. We analyzed RNA sequencing and clinical data from publicly available tumor tissue samples of 8,977 carcinoma patients in the Genomic Data Commons.
-
-Our findings revealed that PTAFR overexpression correlates with reduced patient survival, increased tumor size, and enhanced lymph node metastasis. Further analysis identified 151 differentially expressed genes associated with PTAFR, many of which regulate immune responses and proto-oncogenic signaling.
-
-Histological and single-cell analyses demonstrated an immunosuppressive TME in carcinoma tissues with elevated PTAFR expression. In vivo validation indicated reduced tumor growth and increased infiltration of pro-inflammatory cells in PTAFR knockout mice. Protein modeling suggests that PTAFR forms physical complexes with immunosuppressive mediators STAT3 and PD-L2, and that pathogenic variants may disrupt the PAF-binding domain, potentially altering its signaling.
-
-Together, our findings establish PTAFR as a critical regulator of tumor progression, directly linking its expression to immunosuppressive signaling in the TME, enhanced tumor growth, and reduced patient survival, underscoring its potential as a therapeutic target.
+Solid tumor carcinogenesis is driven by complex interactions within the tumor microenvironment (TME), which influence tumor initiation, progression, and response to treatment. The phospholipid platelet-activating factor (PAF) has been described to affect TME and growth; however, evidence so far has been limited to experimental in vitro and in vivo models. This study investigates the role of PAF receptor (PTAFR) across various carcinomas through patient data-driven analysis. We analyzed RNA sequencing and clinical data from publicly available tumor tissue samples of 8,977 carcinoma patients in the Genomic Data Commons. Our findings revealed that PTAFR overexpression correlates with reduced patient survival, increased tumor size, and enhanced lymph node metastasis. Further analysis identified 151 differentially expressed genes associated with PTAFR, many of which regulate immune responses and proto-oncogenic signaling. Histological and single-cell analyses demonstrated an immunosuppressive TME in carcinoma tissues with elevated PTAFR expression. In vivo validation indicated reduced tumor growth and increased infiltration of pro-inflammatory cells in PTAFR knockout mice. Protein modeling suggests that PTAFR forms physical complexes with immunosuppressive mediators STAT3 and PD-L2, and that pathogenic variants may disrupt the PAF-binding domain, potentially altering its signaling. Together, our findings establish PTAFR as a critical regulator of tumor progression, directly linking its expression to immunosuppressive signaling in the TME, enhanced tumor growth, and reduced patient survival, underscoring its potential as a therapeutic target.
 
 ## 👩‍🔬 Authors
 
@@ -36,38 +28,36 @@ Claudia Pommerenke¹
 - Single-cell and histology data: Available via referenced public datasets in the manuscript  
 - Processed data: Available upon request (see contact below)
 
-## 🔁 How to Reproduce
-
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/your-user/ptafr-tme-analysis.git
-   cd ptafr-tme-analysis
-   ```
-
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. Run the analysis:
-   Open and execute the notebooks in the `notebooks/` directory to replicate the core results.
-
 ## 🧰 Tools and Libraries
 
-- Python 3.10  
-- Pandas, NumPy, SciPy  
-- Scanpy, Seaborn, Matplotlib  
-- scikit-learn, XGBoost, LightGBM  
-- Lifelines (survival analysis)  
-- AlphaFold / ColabFold (protein modeling)
+### 📦 Installation
+
+You can install the necessary R packages with the following commands:
+
+```r
+install.packages(c("ggplot2", "patchwork", "survival", "survminer"))
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install(c("DESeq2", "clusterProfiler", "enrichplot", "org.Hs.eg.db"))
+# Optional: for protein structure modeling
+BiocManager::install("alphafoldR")
+install.packages("bio3d")
+```
+
+- R version 4.3+  
+- `DESeq2` – Differential gene expression analysis  
+- `ggplot2`, `patchwork` – Data visualization  
+- `enrichplot`, `clusterProfiler` – Functional enrichment and gene ontology  
+- `survival`, `survminer` – Survival analysis  
+- `BiocManager`, `org.Hs.eg.db` – Annotation and biological databases  
+- `alphafoldR`, `bio3d` – Protein structure modeling and visualization
 
 ## 📁 Project Structure
 
 ```
-📁 data/               # Processed input and metadata  
-📁 notebooks/          # Analysis and visualization notebooks  
-📁 figures/            # Figures and supplementary plots  
-📁 structure_modeling/ # PTAFR structural predictions and interaction models  
+📄 PTAFR-tumor-analysis.R # R Scripts
 📄 README.md           # Project documentation  
 ```
 

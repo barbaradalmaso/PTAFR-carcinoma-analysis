@@ -21,7 +21,7 @@ Solid tumor carcinogenesis is driven by complex interactions within the tumor mi
 
 - Bulk RNA-seq and clinical data: [Genomic Data Commons (GDC)](https://portal.gdc.cancer.gov/)  
 - Single-cell and histology data: Available via referenced public datasets in the manuscript  
-- Processed data: Available upon request (see contact below)
+- In-house generated carcinoma growth (Ptafr-/- mice): Available upon request (see contact below)
 
 ## 🧰 Tools and Libraries
 
